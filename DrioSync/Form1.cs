@@ -46,11 +46,13 @@ namespace DrioSync {
 
 
 		private void linkListBox_DoubleClick(object sender, EventArgs e) {
-			int index = linkListBox.SelectedIndex;
-			string value = (string)linkListBox.SelectedItem;
-			string linkDir = db.GetColumnFromDB("linkDirectory", "files", "originalDirectory", value)[0];
-			WsnTools.FileOperator.Delete(linkDir);
-			db.DeleteFromDB("files", "originalDirectory", value);
+			MouseEventArgs mouseE = (MouseEventArgs)e;
+			int index = ((ListBox)sender).IndexFromPoint(new Point(mouseE.X, mouseE.Y));
+			if (index == -1) return;
+			string originalDirectory = (string)linkListBox.SelectedItem;
+			string linkDirectory = db.GetColumnFromDB("linkDirectory", "files", "originalDirectory", originalDirectory)[0];
+			WsnTools.FileOperator.Delete(linkDirectory);
+			db.DeleteFromDB("files", "originalDirectory", originalDirectory);
 			ReloadWindow();
 		}
 	}
