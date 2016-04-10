@@ -10,9 +10,9 @@ using WsnTools;
 
 namespace DrioSync {
 
-	//ジェネリクスとかでやってみるか？intとかStringとかにかぎらない
+	//ジェネリクスとかでやってみるか？intとかStringとかにかぎらない。可変長ジェネリクスはめんどくさそうなので、必要そうならインターフェースでやるといいかも
 	public class SQLDataBase {
-		//クラスをもつ辞書とかで定義する？
+
 		public string dbFile;
 		public SQLDataBase(string dbFile) {
 			this.dbFile = dbFile;
@@ -32,13 +32,16 @@ namespace DrioSync {
 				this.originalDirectory = originalDirectory;
 			}
 		}
-		public List<string> GetColumnFromDB(string column, string table) {
-
+		public List<string> GetColumnFromDB(string column, string table, string key = "", string value = "") {
+			if (key != "" && value != "") {
+				key = " WHERE " + key;
+				value = " = '" + value + "'";//valueを''でくくるやつなんとかしたい
+			}
 			List<string> tList = new List<string>();
 			using (var conn = new SQLiteConnection("Data Source=" + dbFile)) {
 				conn.Open();
 				using (SQLiteCommand command = conn.CreateCommand()) {
-					command.CommandText = "SELECT " + column + " FROM " + table; //+ " WHERE " + condition;
+					command.CommandText = "SELECT " + column + " FROM " + table + key + value;
 					using (SQLiteDataReader reader = command.ExecuteReader()) {
 						while (reader.Read()) {
 							tList.Add(reader[column].ToString());
@@ -65,6 +68,11 @@ namespace DrioSync {
 
 		public void InsertToDB(FilesTable filesTable) {
 			InsertToDB(new List<FilesTable>() { filesTable });
+		}
+
+		public void DeleteFromDB(string table, string key, string value) {
+			//valueを''でくくるやつなんとかしたい
+			SendSQLCommand("DELETE FROM " + table + " where " + key + " = '" + value + "'");
 		}
 
 		public void InsertToDB(IEnumerable<FilesTable> fList) {

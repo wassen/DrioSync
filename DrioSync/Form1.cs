@@ -44,10 +44,14 @@ namespace DrioSync {
 				e.Effect = DragDropEffects.None;
 		}
 
+
 		private void linkListBox_DoubleClick(object sender, EventArgs e) {
 			int index = linkListBox.SelectedIndex;
-			linkListBox.Items.RemoveAt(index);
-			
+			string value = (string)linkListBox.SelectedItem;
+			string linkDir = db.GetColumnFromDB("linkDirectory", "files", "originalDirectory", value)[0];
+			WsnTools.FileOperator.Delete(linkDir);
+			db.DeleteFromDB("files", "originalDirectory", value);
+			ReloadWindow();
 		}
 	}
 }
